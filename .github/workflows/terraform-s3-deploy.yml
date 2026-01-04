@@ -27,14 +27,19 @@ jobs:
       run: terraform apply -auto-approve
       working-directory: terraform-s3
       env:
+        # Correctly references the GitHub Secrets
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
 
     - name: Upload Website Files to S3
       run: |
-        aws s3 sync DevOpsZaid/ s3://${{ secrets.BUCKET_NAME }} --delete
+        # CORRECTED PATH & SECURE REFERENCE: Syncs files from the root (./) 
+        # and correctly uses the BUCKET_NAME secret.
+        # Note: 'DevOpsZaid/' was changed to './'
+        aws s3 sync ./ s3://${{ secrets.BUCKET_NAME }} --exclude "terraform-s3/*" --delete
       env:
+        # Correctly references the GitHub Secrets
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
