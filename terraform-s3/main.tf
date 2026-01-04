@@ -1,6 +1,13 @@
-resource "aws_s3_bucket" "website_bucket" {
-  bucket = var.bucket_name # <--- Uses the variable defined in variables.tf
+resource "random_id" "suffix" {
+  byte_length = 4
 }
+
+resource "aws_s3_bucket" "website_bucket" {
+  # Appending the random_id to ensure global uniqueness
+  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
+}
+# ... rest of your resources follow ...
+
 
 resource "aws_s3_bucket_public_access_block" "public_access" {
   bucket = aws_s3_bucket.website_bucket.id
