@@ -1,13 +1,6 @@
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
 resource "aws_s3_bucket" "website_bucket" {
-  # Appending the random_id to ensure global uniqueness
-  bucket = "${var.bucket_name}-${random_id.suffix.hex}"
+  bucket = "devopszaid-static-site-zaid-20260104-1bfd344c"
 }
-# ... rest of your resources follow ...
-
 
 resource "aws_s3_bucket_public_access_block" "public_access" {
   bucket = aws_s3_bucket.website_bucket.id
@@ -22,7 +15,7 @@ resource "aws_s3_bucket_website_configuration" "website" {
   bucket = aws_s3_bucket.website_bucket.id
 
   index_document {
-    suffix = "home.html"
+    suffix = "index.html"
   }
 }
 
