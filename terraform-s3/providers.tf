@@ -10,8 +10,5 @@ terraform {
 }
 
 provider "aws" {
-  # This region value will come from the variable defined in variables.tf
   region = var.aws_region
-
-  # Forced commit trigger
 }

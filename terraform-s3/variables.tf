@@ -7,5 +7,5 @@ variable "aws_region" {
 variable "bucket_name" {
   description = "S3 bucket name for the website"
   type        = string
-  default     = "devopszaid-static-site-zaid-20260104"
+  default     = "devopszaid-static-site-${timestamp()}"
 }

@@ -11,12 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo (FINAL GIT FIX)
+    - name: Checkout repo
       uses: actions/checkout@v4
       with:
-        # CRITICAL FIX 1: Bypass submodule error and fetch full history
         submodules: false
-        fetch-depth: 0 # Forces a full clone, clearing the runner's persistent cache/state
+        fetch-depth: 0
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
@@ -32,8 +31,17 @@ jobs:
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
 
-    - name: Terraform Apply (Bucket is created here)
+    - name: Terraform Apply
       run: terraform apply -auto-approve
+      working-directory: terraform-s3
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    - name: Get Bucket Name from Terraform Output
+      id: bucket_name
+      run: echo "BUCKET_NAME=$(terraform output -raw bucket_name)" >> $GITHUB_ENV
       working-directory: terraform-s3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -42,16 +50,13 @@ jobs:
 
     - name: Upload Website Files to S3
       run: |
-        # Sync the DevOpsZaid folder content to the S3 bucket.
-        aws s3 sync ./DevOpsZaid/ s3://${{ secrets.BUCKET_NAME }} --exclude "terraform-s3/*" --delete
+        aws s3 sync ./DevOpsZaid/ s3://$BUCKET_NAME --delete
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        # CRITICAL FIX 2: Correctly pass the AWS_REGION to the AWS CLI
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        
+
     - name: Final Cleanup
       run: |
-        # Remove local submodule config to avoid post-job "No url found for submodule" error
         git config --local --remove-section submodule.DevOpsZaid || true
         rm -f .gitmodules || true
